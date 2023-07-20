@@ -19,29 +19,29 @@
     @livewireStyles
 </head>
 <body class="font-sans antialiased">
-<x-banner/>
 
-<div class="min-h-screen bg-gray-100">
-    {{--    @livewire('navigation-menu')--}}
-
-    <!-- Page Heading -->
-    @if (isset($header))
-        <header class="bg-white shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
-            </div>
-        </header>
-    @endif
-
-    <!-- Page Content -->
-    <main>
-        <div class="container mx-auto ">
-            {{ $slot }}
+<div class="bg-gray-300 h-max min-h-screen">
+    <div class="navbar">
+        <div class="flex-1">
+            <a class="btn btn-ghost normal-case text-xl" href="/">Rimna</a>
         </div>
-    </main>
-</div>
+        <div class="flex-none">
+            <ul class="menu menu-horizontal px-1 z-10">
+                <li><a href="{{route("product")}}" class="{{request()->routeIs('product')?'active':''}}">Products</a>
+                </li>
+                @if(Auth::user())
+                    <li><a href="{{route("admin.product")}}">Manage product</a></li>
 
-@stack('modals')
+                @else
+                    <li><a href="{{route("login")}}">Login</a></li>
+                @endif
+            </ul>
+        </div>
+    </div>
+    <div class="container mx-auto px-4 pb-4">
+        {{ $slot }}
+    </div>
+</div>
 
 @livewireScripts
 </body>

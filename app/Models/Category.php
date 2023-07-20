@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasFactory;
 
     protected $guarded = [];
 
@@ -29,5 +30,10 @@ class Category extends Model
         static::deleting(function ($model) {
             $model->deleted_by = auth()->check() ? auth()->user()->id : null;
         });
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, "id_category", "id");
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Livewire\Admin\Categories;
 use App\Http\Livewire\Admin\Products;
+use App\Http\Livewire\Product;
 use App\Http\Livewire\Welcome;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +17,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', Welcome::class);
+Route::get('/', Welcome::class)->name("home");
+Route::get('/product', Product::class)->name("product");
 
 Route::middleware([
     'auth:sanctum',
@@ -25,10 +27,10 @@ Route::middleware([
 ])->name("admin.")
     ->prefix("admin")
     ->group(function () {
-        Route::get('/', function () {
-            return view('dashboard');
-        })->name('index');
-        Route::get("products", Products::class)->name("product");
+//        Route::get('/', function () {
+//            return view('dashboard');
+//        })->name('index');
+        Route::get("/", Products::class)->name("product");
         Route::get("categories", Categories::class)->name("category");
 
     });

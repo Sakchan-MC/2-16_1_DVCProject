@@ -16,6 +16,8 @@ return new class extends Migration {
                 ->unique();
             $table->string("desc")
                 ->nullable();
+            $table->string("img")
+                ->nullable();
             $table->foreignId("id_category")
                 ->nullable()
                 ->constrained("categories")

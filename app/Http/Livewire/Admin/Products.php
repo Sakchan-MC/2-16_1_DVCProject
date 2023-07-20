@@ -14,15 +14,16 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
 use LaravelIdea\Helper\App\Models\_IH_Product_C;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Str;
 
 class Products extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
-    public string $name = "";
-    public string $desc = "";
-    public string $idCategory = "";
+    public $file;
     public Product $currentProduct;
 
     public function render(): View|\Illuminate\Foundation\Application|Factory|Application
@@ -33,52 +34,34 @@ class Products extends Component
     public function submit(): void
     {
         $this->validate();
-        if ($this->currentProduct?->id) {
-            $this->update();
-        } else {
-            $this->create();
-        }
-
-    }
-
-    public function update(): void
-    {
         try {
             DB::beginTransaction();
-            $this->currentProduct->name = $this->name;
-            $this->currentProduct->desc = $this->desc;
-            $this->currentProduct->id_category = $this->idCategory;
+            if ($this->file) {
+                $this->currentProduct->img = Str::replace("public", "storage", $this->file->store("public/products"));
+            } elseif (!$this->currentProduct->img) {
+                $this->currentProduct->img = "storage/placeholder.jpg";
+            }
             $this->currentProduct->save();
             $this->dispatchBrowserEvent("close_modal");
             toastr()->addSuccess("Product has been updated");
             DB::commit();
+            $this->cleanupOldUploads();
         } catch (Exception $ex) {
             DB::rollBack();
             toastr()->timeOut(10000)->addError($ex->getMessage());
         }
-    }
 
-    public function create(): void
-    {
-        try {
-            DB::beginTransaction();
-            Product::create([
-                "name" => $this->name,
-                "desc" => $this->desc,
-                "id_category" => $this->idCategory
-            ]);
-            DB::commit();
-            $this->dispatchBrowserEvent("close_modal");
-            toastr()->addSuccess("Product has been created");
-        } catch (Exception $ex) {
-            DB::rollBack();
-            toastr()->timeOut(10000)->addError($ex->getMessage());
-        }
     }
 
     public function clear(): void
     {
-        $this->resetExcept("currentProduct");
+        $this->init();
+    }
+
+    public function init()
+    {
+        $this->currentProduct = new Product();
+        $this->currentProduct->id_category = $this->category->first()?->id;
     }
 
     public function remove($id, $name): void
@@ -98,9 +81,6 @@ class Products extends Component
     public function setCurrentProduct($id): void
     {
         $this->currentProduct = Product::where("id", $id)->first();
-        $this->name = $this->currentProduct->name;
-        $this->desc = $this->currentProduct->desc;
-        $this->idCategory = $this->currentProduct->id_category;
     }
 
     public function getCategoryProperty(): Collection
@@ -116,9 +96,10 @@ class Products extends Component
     protected function rules(): array
     {
         return [
-            "name" => ['required', "max:255", Rule::unique('products')->ignore($this->currentProduct?->id)],
-            "form.desc" => "max:255",
-            "form.id_category" => "required|not_in:0"
+            "currentProduct.id_category" => "nullable",
+            "currentProduct.desc" => "nullable",
+            "currentProduct.name" => ['required', "max:255", Rule::unique('products', "name")->ignore($this->currentProduct->id)],
+            "file" => "image"
         ];
     }
 }
