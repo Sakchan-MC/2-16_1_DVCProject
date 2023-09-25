@@ -39,6 +39,6 @@ class Product extends Model
         return $this->hasOne(Category::class, "id", "id_category");
     }
     public function categoryss(){
-        return $this->hasOne()
+        return $this->hasOne();
     }
 }

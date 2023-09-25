@@ -13,14 +13,9 @@ class Product extends Component
 {
     public \App\Models\Product $product;
 
-    public function render(): View|\Illuminate\Foundation\Application|Factory|Application
+    public function render()
     {
-        return view('livewire.product')->layout("layouts.welcome");
+        $categories = Category::with("products")->get();
+        return view('livewire.product', ["categories" => $categories])->layout("layouts.welcome");
     }
-
-    public function getProductProperty(): Collection|null
-    {
-        return Category::with("products")->get();
-    }
-
 }

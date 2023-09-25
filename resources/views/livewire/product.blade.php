@@ -1,5 +1,5 @@
 <div class="flex flex-wrap gap-4">
-    @foreach($this->product as $category)
+    @foreach($categories as $category)
         <div class="card w-full bg-gray-100 shadow-xl flex-auto">
             <div class="card-body">
                 <h2 class="card-title">{{$category->name}}</h2>
