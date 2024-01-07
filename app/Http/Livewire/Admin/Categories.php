@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\Admin;
 
-use App\Models\Category;
+use App\Models\Category as CategoryModel;
 use DB;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
@@ -17,10 +17,8 @@ use Livewire\WithPagination;
 class Categories extends Component
 {
     use WithPagination;
-
-    public string $name = "";
-    public string $desc = "";
-    public Category $cCategory;
+    public string $title = "";
+    public CategoryModel $category;
 
     public function render(): View|\Illuminate\Foundation\Application|Factory|Application
     {
@@ -29,91 +27,65 @@ class Categories extends Component
 
     public function mount(): void
     {
-        $this->cCategory = new Category();
+        $this->init();
     }
+
+    public function init(): void
+    {
+        $this->resetExcept("category");
+        $this->title = 'Add Category';
+        $this->category = new CategoryModel;
+    }
+
 
     public function submit(): void
     {
         $this->validate();
-        if ($this->cCategory?->id) {
-            $this->update();
-        } else {
-            $this->create();
-        }
-
-    }
-
-    public function update(): void
-    {
+        $id = $this->category->id;
         try {
             DB::beginTransaction();
-            $this->cCategory->name = $this->name;
-            $this->cCategory->desc = $this->desc;
-            $this->cCategory->save();
-            $this->dispatchBrowserEvent("close_modal");
-            toastr()->addSuccess("Product has been updated");
+            $this->category->save();
             DB::commit();
+            $this->dispatchBrowserEvent("close_modal");
+            toastr()->addSuccess($id ? "Category has been updated" : "Category has been created");
         } catch (Exception $ex) {
             DB::rollBack();
             toastr()->timeOut(10000)->addError($ex->getMessage());
         }
     }
-
-    public function create(): void
-    {
-        try {
-            DB::beginTransaction();
-            Category::create([
-                "name" => $this->name,
-                "desc" => $this->desc,
-            ]);
-            DB::commit();
-            $this->dispatchBrowserEvent("close_modal");
-            toastr()->addSuccess("Product has been created");
-        } catch (Exception $ex) {
-            DB::rollBack();
-            toastr()->timeOut(10000)->addError($ex->getMessage());
-        }
-    }
-
-    public function clear(): void
-    {
-        $this->resetExcept("cCategory");
-    }
-
 
     public function remove($id, $name): void
     {
         try {
             DB::beginTransaction();
-            Category::where("id", $id)->delete();
+            CategoryModel::where("id", $id)->delete();
             toastr()->addSuccess("$name has been deleted");
             DB::commit();
         } catch (Exception $ex) {
             DB::rollBack();
             toastr()->timeOut(10000)->addError($ex->getMessage());
         }
-
     }
 
     public function setCurrent($id): void
     {
-        $this->cCategory = Category::query()->where("id", $id)->first();
-        $this->name = $this->cCategory->name;
-        $this->desc = $this->cCategory->desc;
+        $this->init();
+        $this->category = CategoryModel::query()->where("id", $id)->first();
+        $this->title = 'Edit Category';
     }
 
 
-    public function getCategoryProperty(): _IH_Product_C|LengthAwarePaginator
+    public function getCategoriesProperty(): _IH_Product_C|LengthAwarePaginator
     {
-        return Category::paginate(10);
+        return CategoryModel::paginate(10);
     }
 
     protected function rules(): array
     {
         return [
-            "name" => ['required', "max:255", Rule::unique('categories')->ignore($this->cCategory?->id)],
-            "desc" => "max:255",
+            "category.id" => "nullable",
+            "category.name" => ['required', "max:255", Rule::unique('categories','name')->ignore($this->category->id)],
+            "category.desc" => "max:255",
         ];
     }
 }

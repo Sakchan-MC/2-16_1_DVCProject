@@ -8,7 +8,7 @@
                         Category
                     </div>
                     <div>
-                        <button class="btn btn-primary" onclick="modal.showModal()" wire:click="clear">Add</button>
+                        <button class="btn btn-primary" onclick="modal.showModal()" wire:click="init()">Add</button>
                     </div>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @forelse($this->category as $category)
+                    @forelse($this->categories as $category)
                         <tr>
                             <td>{{$category->id}}</td>
                             <td>{{$category->name}}</td>
@@ -54,7 +54,7 @@
                     @endforelse
                     </tbody>
                 </table>
-                {{ $this->category->links()}}
+                {{ $this->categories->links()}}
             </div>
         </div>
     </div>
@@ -62,7 +62,7 @@
 
         <form method="dialog" class="modal-box" wire:submit.prevent="submit">
             <div class="w-full">
-                <h3 class="font-bold text-lg mb-5">{{$cCategory?"Edit":"Add"." Categories"}}</h3>
+                <h3 class="font-bold text-lg mb-5">{{$title}}</h3>
                 <div wire:loading class="text-center w-full">
                     <progress class="progress"></progress>
                 </div>
@@ -73,8 +73,8 @@
                     </label>
                     <input id="name" type="text" maxlength="255" placeholder="Category name"
                            class="input input-bordered w-full  @error("name")input-error @enderror"
-                           wire:model.defer="name"/>
-                    @error("name")
+                           wire:model.defer="category.name"/>
+                    @error("category.name")
                     <label class="label" for="name">
                         <span class="label-text-alt text-red-500">{{ $message }}</span>
                     </label>
@@ -82,9 +82,9 @@
                     <label class="label" for="desc">
                         <span class="label-text">Category desc</span>
                     </label>
-                    <input id="desc" type="text" maxlength="255" placeholder="Category desc"
+                    <input id="category.desc" type="text" maxlength="255" placeholder="Category desc"
                            class="input input-bordered w-full  @error("desc")input-error @enderror"
-                           wire:model.defer="desc"/>
+                           wire:model.defer="category.desc"/>
                     @error("desc")
                     <label class="label" for="desc">
                         <span class="label-text-alt text-red-500">{{ $message }}</span>
